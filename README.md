@@ -83,7 +83,6 @@ Developed by Sanya Gupta
 GitHub: [sanyagupta31](https://github.com/sanyagupta31)  
 Made with 💙 and a love for AI.
 
-```
 
 
 
