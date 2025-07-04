@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News Summarizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #c3ecf7, #f6eaff);
+      min-height: 100vh;
+      color: #1e293b;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #0f172a, #1f2937);
+      color: #f1f5f9;
+    }
+
+    .navbar {
+      background: #3b82f6;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    .container {
+      padding: 100px 20px 20px;
+      text-align: center;
+    }
+
+    .card {
+      background: rgba(68, 91, 240, 0.25);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      max-width: 750px;
+      margin: auto;
+    }
+
+    select, button, input[type=checkbox] {
+      padding: 10px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-weight: 500;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    .button-group a, .button-group button {
+      margin: 5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    pre {
+      background: #e0f2fe;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    .dark pre {
+      background: #4f92f1;
+      color: white;
+    }
+
+    .options-row, .button-group {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: #3b82f6;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        padding: 10px 0;
+      }
+
+      .nav-links.show {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .container {
+        padding: 120px 20px 20px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      select, button {
+        width: 100%;
+      }
+
+      .options-row {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div><strong>📰 Gemini News</strong></div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">🏠Home</a>
+      <a href="/chatbot_page">🤖Chatbot</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Smart AI News Summarizer</h2>
+      
+      <select id="language">
+        <option value="en">English</option>
+        <option value="hi">हिंदी</option>
+      </select>
+      
+      <select id="newsType">
+        <option value="in">🇮🇳 India News</option>
+        <option value="us">🌐 World News</option>
+      </select>
+
+      <div class="options-row">
+        <label><input type="checkbox" id="last24"> Last 24 hours</label>
+        <label><input type="checkbox" id="trending"> Trending</label>
+      </div>
+
+      <div class="button-group">
+        <button onclick="fetchSummary()">🔄 Generate</button>
+        <button id="listenBtn" onclick="speakSummary()">🔊 Listen</button>
+        <button onclick="downloadPDF()">📄 PDF</button>
+        <a id="whatsappBtn" target="_blank" style="background:#25d366; color:white; padding:10px 16px; border-radius:8px;">💬 WhatsApp</a>
+      </div>
+
+      <pre id="output">Click "Generate" to get a summary!</pre>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // 🌙 Apply theme from localStorage
+    const mode = localStorage.getItem("mode") || "light";
+    if (mode === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    function fetchSummary() {
+      const country = document.getElementById("newsType").value;
+      const lang = document.getElementById("language").value;
+      const last24 = document.getElementById("last24").checked;
+      const trending = document.getElementById("trending").checked;
+      const output = document.getElementById("output");
+      output.textContent = "Generating...";
+
+      fetch(`/summarize_news?country=${country}&lang=${lang}&last24=${last24}&trending=${trending}`)
+        .then(res => res.json())
+        .then(data => {
+          output.textContent = data.summary;
+          document.getElementById("whatsappBtn").href = `https://wa.me/?text=${encodeURIComponent(data.summary)}`;
+        })
+        .catch(() => output.textContent = "❌ Failed to fetch news.");
+    }
+
+    let isSpeaking = false;
+    let currentUtterance = null;
+
+    function speakSummary() {
+      const btn = document.getElementById("listenBtn");
+      const text = document.getElementById("output").textContent;
+      const lang = document.getElementById("language").value;
+
+      if (!text.trim()) {
+        alert("Please generate the summary first.");
+        return;
+      }
+
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        btn.textContent = "🔊 Listen";
+        return;
+      }
+
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = lang === "hi" ? "hi-IN" : "en-US";
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        btn.textContent = "🔊 Listen";
+      };
+
+      currentUtterance.onerror = () => {
+        isSpeaking = false;
+        btn.textContent = "🔊 Listen";
+        alert("❌ Error occurred while speaking.");
+      };
+
+      isSpeaking = true;
+      btn.textContent = "🔇 Stop";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(currentUtterance);
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const text = document.getElementById("output").textContent;
+      const lines = doc.splitTextToSize(text, 180);
+      doc.text(lines, 15, 20);
+      doc.save("news_summary.pdf");
+    }
+
+    function toggleMenu() {
+      document.getElementById("navLinks").classList.toggle("show");
+    }
+  </script>
+</body>
+</html>

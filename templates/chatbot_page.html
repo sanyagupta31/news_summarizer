@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #c3ecf7, #f6eaff);
+      color: #1e293b;
+      padding-top: 70px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #0f172a, #1f2937);
+      color: #f1f5f9;
+    }
+
+    .navbar {
+      background: #3b82f6;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .chat-box {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    body.dark .chat-box {
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    .messages {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 12px;
+      height: 350px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+
+    body.dark .messages {
+      background: #1e3a8a;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px 14px;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .user {
+      background-color: #3b82f6;
+      color: white;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .bot {
+      background-color: #16a34a;
+      color: white;
+      text-align: left;
+      margin-right: auto;
+    }
+
+    body.dark .user {
+      background-color: #2563eb;
+    }
+
+    body.dark .bot {
+      background-color: #059669;
+    }
+
+    .input-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    select, button {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ccc;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: #3b82f6;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        padding: 10px 0;
+      }
+
+      .nav-links.show {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .input-area {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      input[type="text"], button, select {
+        width: 100%;
+      }
+
+      .chat-box {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">🤖Gemini Chatbot</div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">🏠Home</a>
+      <a href="/chatbot_page">🤖Chatbot</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="chat-box">
+      <div style="text-align: right; margin-bottom: 10px;">
+        <select id="langSelect" onchange="saveLang()">
+          <option value="en">English</option>
+          <option value="hi">हिंदी</option>
+        </select>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="message bot" id="greeting">👋 Hello! Ask me about today’s news like Cricket, Bollywood, Tech etc.</div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="Type your question..." />
+        <button onclick="sendMessage()">Send</button>
+        <div id="loading" class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("userInput");
+    const loading = document.getElementById("loading");
+    const langSelect = document.getElementById("langSelect");
+    const greeting = document.getElementById("greeting");
+
+    // 🌙 Apply dark mode from localStorage
+    window.onload = () => {
+      const mode = localStorage.getItem("mode");
+      if (mode === "dark") {
+        document.body.classList.add("dark");
+      }
+
+      const savedLang = localStorage.getItem("lang") || "en";
+      langSelect.value = savedLang;
+      greeting.innerText = savedLang === "hi"
+        ? "👋 नमस्ते! मुझसे आज की खबरों के बारे में पूछें जैसे क्रिकेट, बॉलीवुड, टेक आदि।"
+        : "👋 Hello! Ask me about today’s news like Cricket, Bollywood, Tech etc.";
+    };
+
+    function saveLang() {
+      localStorage.setItem("lang", langSelect.value);
+      window.location.reload();
+    }
+
+    function addMessage(content, sender) {
+      const msg = document.createElement("div");
+      msg.className = `message ${sender}`;
+      msg.textContent = content;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      const lang = langSelect.value;
+      addMessage(text, "user");
+      input.value = "";
+      loading.style.display = "inline-block";
+
+      fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, lang: lang })
+      })
+      .then(res => res.json())
+      .then(data => {
+        loading.style.display = "none";
+        addMessage(data.reply, "bot");
+      })
+      .catch(() => {
+        loading.style.display = "none";
+        addMessage("❌ Error contacting chatbot.", "bot");
+      });
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function toggleMenu() {
+      document.getElementById("navLinks").classList.toggle("show");
+    }
+  </script>
+</body>
+</html>
