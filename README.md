@@ -1,84 +1,82 @@
 
-```markdown
-# 📰 News Summarizer & Gemini Chatbot
+---
 
-A responsive AI-powered web application that summarizes the latest news and allows interactive chatbot communication using Gemini AI. Built using HTML, CSS, and JavaScript — no frameworks, just pure frontend magic!
+**📰 Gemini News Summarizer & Chatbot**
+
+An AI-powered web application that summarizes news and answers your queries in both English and हिंदी. It supports voice playback, PDF export, WhatsApp sharing, and is fully responsive with dark mode.
+
+**🔗 Live App**
+[https://news-summarizer-u9kv.onrender.com](https://news-summarizer-u9kv.onrender.com)
 
 ---
 
-## ✨ Features
+**Key Features**
 
-- 🌐 News summarization by country and language (India/World | English/हिंदी)
-- 🔊 Text-to-speech support to listen to summaries
-- 📄 Download summary as PDF
-- 💬 WhatsApp sharing
-- 🤖 Gemini-based chatbot with language toggle (English/हिंदी)
-- 🌙 Dark mode toggle (saved in localStorage)
-- 📱 Mobile-friendly responsive UI with side menu
-
----
-
-
+• Summarize India & World news
+• Language support: English / हिंदी
+• Text-to-speech for summary
+• Share on WhatsApp
+• Download summary as PDF
+• AI chatbot for news-related questions
+• Fully responsive UI with dark mode
 
 ---
 
+**How to Run Locally**
 
+1. Clone the repository
+   `git clone https://github.com/sanyagupta31/news_summarizer.git`
 
-## 🛠️ Technologies Used
+2. Navigate into the project
+   `cd news_summarizer`
 
-- HTML5 + CSS3 + JavaScript
-- Gemini AI (via backend)
-- jsPDF for PDF generation
-- Web Speech API for speech output
-- LocalStorage for theme/language persistence
-- Mobile-first responsive design
+3. Create a virtual environment
+   `python -m venv venv`
+   Activate it:
+   `venv\Scripts\activate` (Windows)
+   `source venv/bin/activate` (macOS/Linux)
 
----
+4. Install dependencies
+   `pip install -r requirements.txt`
 
-## 📦 Setup & Usage
+5. Create a `.env` file and add your Gemini API key
 
-Clone this repo:
+   ```
+   GOOGLE_API_KEY=your_api_key_here
+   ```
 
-```bash
-git clone https://github.com/sanyagupta31/news-summarizer-chatbot.git
-cd news-summarizer-chatbot
-````
-
-Then open `index.html` or `chatbot_page.html` in your browser:
-
-```bash
-open index.html
-# or
-open chatbot_page.html
-```
+6. Run the app
+   `python app.py`
+   Open in browser: `http://localhost:5000`
 
 ---
 
-## 💡 What I Learned
+**Deploying on Render**
 
-* Built responsive and accessible UIs using CSS Flexbox and media queries
-* Integrated AI (Gemini) with the frontend through API
-* Implemented dark mode and language switcher using localStorage
-* Enhanced user experience with text-to-speech and PDF download
-* Developed a clean, modern interface for news interaction and queries
+• Set up a new **Web Service** on [Render](https://render.com)
+• Choose your GitHub repo
+• Set build command to: *(leave empty)*
+• Set start command to:
+`python app.py`
 
----
-
-## 🙋‍♀️ About Me
-
-This project was created by **Sanya Gupta** as part of my web development and AI learning journey.
-
-Connect with me:
-
-* 🌐 GitHub: [sanyagupta31](https://github.com/sanyagupta31)
-* 💼 LinkedIn: [linkedin.com/in/sanyagupta31](https://www.linkedin.com/in/sanyagupta31)
+• Add environment variable:
+`GOOGLE_API_KEY = your_api_key_here`
 
 ---
 
-Made with 💙 by Sanya Gupta
+**Technologies Used**
 
-````
+• Python & Flask
+• HTML, CSS, JavaScript
+• Google Gemini API
+• Render for deployment
 
+---
 
+**Author**
 
+Created by Sanya Gupta
+GitHub: [sanyagupta31](https://github.com/sanyagupta31)
+
+---
 
